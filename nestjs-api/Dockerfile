@@ -20,8 +20,8 @@ COPY --from=prod-build /app/dist /app/dist
 COPY --from=prod-build /app/prisma /app/dist/prisma
 COPY --from=prod-build /app/node_modules /app/node_modules
 
-RUN npx prisma generate
-
 WORKDIR /app/dist
+
+RUN npx prisma generate
 
 CMD ["node", "./main.js"]
