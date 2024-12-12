@@ -2,6 +2,9 @@
 	"folders": [
 		{
 			"path": "nestjs-api"
+		},
+		{
+			"path": "next-frontend"
 		}
 	],
 	"settings": {}
