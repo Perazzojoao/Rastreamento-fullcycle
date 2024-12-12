@@ -25,7 +25,7 @@ export class DirectionsService {
       params: requestParams,
     });
 
-    return {
+    const response = {
       ...data,
       request: {
         origin: {
@@ -36,7 +36,7 @@ export class DirectionsService {
           },
         },
         destination: {
-          placeId: requestParams.origin,
+          placeId: requestParams.destination,
           location: {
             lat: data.routes[0].legs[0].end_location.lat,
             lng: data.routes[0].legs[0].end_location.lng,
@@ -45,5 +45,7 @@ export class DirectionsService {
         mode: requestParams.mode,
       },
     };
+
+    return response;
   }
 }
