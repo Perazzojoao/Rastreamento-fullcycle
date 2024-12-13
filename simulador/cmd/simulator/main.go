@@ -3,15 +3,23 @@ package main
 import (
 	"context"
 	"log"
+	"os"
 
 	"github.com/Perazzojoao/Rastreamento-fullcycle/simulador/internal"
+	"github.com/joho/godotenv"
 	"github.com/segmentio/kafka-go"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+var mongoStr string
+
 func main() {
-	mongoStr := "mongodb://root:root@localhost:27017/routes?authSource=admin"
+	godotenv.Load()
+	mongoStr = os.Getenv("MONGO_STR")
+	if mongoStr == "" {
+		mongoStr = "mongodb://root:root@localhost:27017/routes?authSource=admin"
+	}
 	mongoConn, err := mongo.Connect(context.Background(), options.Client().ApplyURI(mongoStr))
 	if err != nil {
 		panic(err)
@@ -22,7 +30,7 @@ func main() {
 
 	chDriverMoved := make(chan *internal.DriverMovedEvent)
 
-	kafkaBroker := "localhost:9092"
+	kafkaBroker := os.Getenv("MONGO_BROKER")
 	freightWriter := &kafka.Writer{
 		Addr:     kafka.TCP(kafkaBroker),
 		Topic:    "freight",
