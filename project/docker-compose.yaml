@@ -4,8 +4,12 @@ services:
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: root
+    networks:
+      - mongo
     ports:
       - 27017:27017
+    volumes:
+      - ./mongodb_data:/data/db
     restart: unless-stopped
 
   app:
@@ -15,9 +19,24 @@ services:
       - ../nestjs-api/.env
     environment:
       - DATABASE_URL=mongodb://root:root@db:27017/nest?authSource=admin&directConnection=true
+    networks:
+      - backend
+      - mongo
     ports:
       - 3001:3001
     restart: unless-stopped
     deploy:
       mode: replicated
       replicas: 1
+
+volumes:
+  mongodb_data:
+    driver: local
+
+networks:
+  backend:
+    name: backend
+    driver: bridge
+  mongo:
+    name: mongo
+    driver: bridge
