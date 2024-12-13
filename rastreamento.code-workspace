@@ -5,6 +5,9 @@
 		},
 		{
 			"path": "next-frontend"
+		},
+		{
+			"path": "simulador"
 		}
 	],
 	"settings": {}
