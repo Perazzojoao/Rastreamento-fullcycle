@@ -1,12 +1,19 @@
 {
 	"folders": [
 		{
+			"name": "project",
+			"path": "project"
+		},
+		{
+			"name": "nestjs-api",
 			"path": "nestjs-api"
 		},
 		{
+			"name": "next-frontend",
 			"path": "next-frontend"
 		},
 		{
+			"name": "simulador",
 			"path": "simulador"
 		}
 	],
