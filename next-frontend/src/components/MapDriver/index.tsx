@@ -56,8 +56,6 @@ export function MapDriver({ route_id, startLocation, endLocation }: MapDriverPro
   }, [route_id, map, startLocation, endLocation])
 
   return (
-    <div className='w-2/3 h-full'>
-      <div ref={mapContainerRef} />
-    </div>
+    <div className='w-2/3 h-full' ref={mapContainerRef}/>
   )
 }
