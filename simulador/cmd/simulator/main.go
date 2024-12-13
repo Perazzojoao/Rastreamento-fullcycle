@@ -12,11 +12,9 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var mongoStr string
-
 func main() {
 	godotenv.Load()
-	mongoStr = os.Getenv("MONGO_STR")
+	mongoStr := os.Getenv("MONGO_STR")
 	mongoConn, err := mongo.Connect(context.Background(), options.Client().ApplyURI(mongoStr))
 	if err != nil {
 		panic(err)
