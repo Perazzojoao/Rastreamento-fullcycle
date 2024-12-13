@@ -14,7 +14,7 @@ import (
 
 func main() {
 	godotenv.Load()
-	mongoStr := os.Getenv("MONGO_STR")
+	mongoStr := os.Getenv("MONGO_URI")
 	mongoConn, err := mongo.Connect(context.Background(), options.Client().ApplyURI(mongoStr))
 	if err != nil {
 		panic(err)
@@ -25,7 +25,7 @@ func main() {
 
 	chDriverMoved := make(chan *internal.DriverMovedEvent)
 
-	kafkaBroker := os.Getenv("MONGO_BROKER")
+	kafkaBroker := os.Getenv("KAFKA_BROKER")
 	freightWriter := &kafka.Writer{
 		Addr:     kafka.TCP(kafkaBroker),
 		Topic:    "freight",
@@ -34,7 +34,7 @@ func main() {
 
 	simulatorDriver := &kafka.Writer{
 		Addr:     kafka.TCP(kafkaBroker),
-		Topic:    "simulator",
+		Topic:    "simulation",
 		Balancer: &kafka.LeastBytes{},
 	}
 
