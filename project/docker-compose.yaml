@@ -35,8 +35,8 @@ volumes:
 
 networks:
   backend:
-    name: backend
+    name: backend_network
     driver: bridge
   mongo:
-    name: mongo
+    name: mongo_network
     driver: bridge
