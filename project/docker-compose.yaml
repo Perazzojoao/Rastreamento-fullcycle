@@ -93,6 +93,7 @@ services:
     networks:
       - kafka
 
+  # Container para criar os tópicos no Kafka ao iniciar
   kafka-topic-generator:
     image: confluentinc/cp-kafka:7.3.0
     depends_on:
