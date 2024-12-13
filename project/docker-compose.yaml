@@ -1,6 +1,8 @@
 services:
   db:
-    build: ./.docker/mongodb
+    build: 
+      context: ./.docker/mongodb
+      dockerfile: Dockerfile
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: root
@@ -15,6 +17,7 @@ services:
   app:
     build:
       context: ../nestjs-api/.
+      dockerfile: Dockerfile
     env_file:
       - ../nestjs-api/.env
     environment:
@@ -22,12 +25,103 @@ services:
     networks:
       - backend
       - mongo
+      - kafka
     ports:
       - 3001:3001
+    depends_on:
+      - db
     restart: unless-stopped
     deploy:
       mode: replicated
       replicas: 1
+
+  simulator:
+    build:
+      context: ../simulador/.
+      dockerfile: Dockerfile
+    environment:
+      - MONGO_URI=mongodb://root:root@db:27017/routes?authSource=admin&directConnection=true
+      - KAFKA_BROKER=kafka:9092
+      - KAFKA_ROUTE_TOPIC=route
+      - KAFKA_FREIGHT_TOPIC=freight
+      - KAFKA_SIMULATION_TOPIC=simulation
+      - KAFKA_GROUP_ID=route-group
+    depends_on:
+      db:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+    networks:
+      - backend
+      - mongo
+      - kafka
+    deploy:
+      mode: replicated
+      replicas: 1
+    restart: unless-stopped
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.3.0
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+    networks:
+      - kafka
+
+  kafka:
+    image: confluentinc/cp-kafka:7.3.0
+    depends_on:
+      - zookeeper
+    ports:
+      - 9092:9092
+      - 9094:9094
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_LISTENERS: INTERNAL://:9092,OUTSIDE://:9094
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,OUTSIDE://host.docker.internal:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    extra_hosts:
+      - "host.docker.internal:172.17.0.1"
+    healthcheck:
+      test: kafka-topics --bootstrap-server kafka:9092 --list
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - kafka
+
+  kafka-topic-generator:
+    image: confluentinc/cp-kafka:7.3.0
+    depends_on:
+      kafka:
+        condition: service_healthy
+      control-center:
+        condition: service_started
+    command: >
+      bash -c "
+      kafka-topics --create --topic route --if-not-exists --bootstrap-server kafka:9092 &&
+      kafka-topics --create --topic freight --if-not-exists --bootstrap-server kafka:9092 &&
+      kafka-topics --create --topic simulation --if-not-exists --bootstrap-server kafka:9092"
+    networks:
+      - kafka
+
+  control-center:
+    image: confluentinc/cp-enterprise-control-center:7.3.0
+    hostname: control-center
+    depends_on:
+      kafka:
+        condition: service_healthy
+    ports:
+      - "9021:9021"
+    environment:
+      CONTROL_CENTER_BOOTSTRAP_SERVERS: "kafka:9092"
+      CONTROL_CENTER_REPLICATION_FACTOR: 1
+      PORT: 9021
+    networks:
+      - kafka
 
 volumes:
   mongodb_data:
@@ -39,4 +133,7 @@ networks:
     driver: bridge
   mongo:
     name: mongo_network
+    driver: bridge
+  kafka:
+    name: kafka_network
     driver: bridge
