@@ -17,9 +17,6 @@ var mongoStr string
 func main() {
 	godotenv.Load()
 	mongoStr = os.Getenv("MONGO_STR")
-	if mongoStr == "" {
-		mongoStr = "mongodb://root:root@localhost:27017/routes?authSource=admin"
-	}
 	mongoConn, err := mongo.Connect(context.Background(), options.Client().ApplyURI(mongoStr))
 	if err != nil {
 		panic(err)
