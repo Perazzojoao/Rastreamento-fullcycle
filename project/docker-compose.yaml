@@ -39,6 +39,7 @@ services:
     build:
       context: ../simulador/.
       dockerfile: Dockerfile
+      target: production
     environment:
       - MONGO_URI=mongodb://root:root@db:27017/routes?authSource=admin&directConnection=true
       - KAFKA_BROKER=kafka:9092
