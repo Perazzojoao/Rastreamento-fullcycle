@@ -1,0 +1,35 @@
+include:
+  - ../kafka/docker-compose.yaml
+  - ../mongo/docker-compose.yaml
+
+services:
+  simulator:
+      build:
+        context: ../simulador/.
+        dockerfile: Dockerfile
+        target: production
+      environment:
+        - MONGO_URI=mongodb://root:root@mongo:27017/routes?authSource=admin&directConnection=true
+        - KAFKA_BROKER=kafka:9092
+        - KAFKA_ROUTE_TOPIC=route
+        - KAFKA_FREIGHT_TOPIC=freight
+        - KAFKA_SIMULATION_TOPIC=simulation
+        - KAFKA_GROUP_ID=route-group
+      depends_on:
+        mongo:
+          condition: service_started
+        kafka:
+          condition: service_healthy
+      networks:
+        - mongo_network
+        - kafka_network
+      deploy:
+        mode: replicated
+        replicas: 1
+      restart: unless-stopped
+
+networks:
+  mongo_network:
+    external: true
+  kafka_network:
+    external: true
