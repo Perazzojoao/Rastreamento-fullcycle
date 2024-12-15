@@ -15,6 +15,12 @@
 		{
 			"name": "simulador",
 			"path": "simulador"
+		},
+		{
+			"path": "kafka"
+		},
+		{
+			"path": "mongo"
 		}
 	],
 	"settings": {}
