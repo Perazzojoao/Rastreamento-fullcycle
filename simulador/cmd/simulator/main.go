@@ -14,8 +14,14 @@ import (
 
 func main() {
 	godotenv.Load()
-	mongoStr := os.Getenv("MONGO_URI")
-	mongoConn, err := mongo.Connect(context.Background(), options.Client().ApplyURI(mongoStr))
+	mongoUri := getEnv("MONGO_URI", "mongodb://root:root@localhost:27017/routes?authSource=admin")
+	kafkaBroker := getEnv("KAFKA_BROKER", "localhost:9092")
+	kafkaRouteTopic := getEnv("KAFKA_ROUTE_TOPIC", "route")
+	kafkaFreightTopic := getEnv("KAFKA_FREIGHT_TOPIC", "freight")
+	kafkaSimulationTopic := getEnv("KAFKA_SIMULATION_TOPIC", "simulation")
+	kafkaGroupID := getEnv("KAFKA_GROUP_ID", "route-group")
+
+	mongoConn, err := mongo.Connect(context.Background(), options.Client().ApplyURI(mongoUri))
 	if err != nil {
 		panic(err)
 	}
@@ -25,23 +31,22 @@ func main() {
 
 	chDriverMoved := make(chan *internal.DriverMovedEvent)
 
-	kafkaBroker := os.Getenv("KAFKA_BROKER")
 	freightWriter := &kafka.Writer{
 		Addr:     kafka.TCP(kafkaBroker),
-		Topic:    "freight",
+		Topic:    kafkaFreightTopic,
 		Balancer: &kafka.LeastBytes{},
 	}
 
 	simulatorDriver := &kafka.Writer{
 		Addr:     kafka.TCP(kafkaBroker),
-		Topic:    "simulation",
+		Topic:    kafkaSimulationTopic,
 		Balancer: &kafka.LeastBytes{},
 	}
 
 	routeReader := kafka.NewReader(kafka.ReaderConfig{
 		Brokers: []string{kafkaBroker},
-		Topic:   "route",
-		GroupID: "simulator",
+		Topic:   kafkaRouteTopic,
+		GroupID: kafkaGroupID,
 	})
 
 	hub := internal.NewEventHub(routeService, mongoConn, chDriverMoved, freightWriter, simulatorDriver)
@@ -61,4 +66,11 @@ func main() {
 			}
 		}(m.Value)
 	}
+}
+
+func getEnv(key, fallback string) string {
+	if value, ok := os.LookupEnv(key); ok {
+		return value
+	}
+	return fallback
 }
