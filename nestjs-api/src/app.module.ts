@@ -7,6 +7,7 @@ import { ConfigModule } from '@nestjs/config';
 import { RoutesModule } from './modules/routes/routes.module';
 import { PrismaModule } from './modules/prisma/prisma.module';
 import { RoutesDriverService } from './modules/routes/routes-driver/routes-driver.service';
+import { KafkaModule } from './modules/kafka/kafka.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { RoutesDriverService } from './modules/routes/routes-driver/routes-drive
     PrismaModule,
     RoutesModule,
     MapsModule,
+    KafkaModule,
   ],
   controllers: [],
   providers: [
