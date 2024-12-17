@@ -11,8 +11,9 @@ services:
       - ../nestjs-api/.env
     environment:
       - DATABASE_URL=mongodb://root:root@mongo:27017/nest?authSource=admin&directConnection=true
+      - KAFKA_BROKER=kafka:9092
     networks:
-      - backend_network
+      - backend
       - mongo_network
       - kafka_network
     ports:
@@ -25,7 +26,7 @@ services:
       replicas: 1
 
 networks:
-  backend_network:
+  backend:
     name: backend_network
     driver: bridge
   mongo_network:
