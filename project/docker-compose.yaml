@@ -1,6 +1,7 @@
 include:
-  - ../nestjs-api/comose.yaml
+  - ../nestjs-api/compose.yaml
   - ../simulador/compose.yaml
   - ../kafka/docker-compose.yaml
   - ../mongo/docker-compose.yaml
+  - ../next-frontend/compose.yaml
 

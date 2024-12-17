@@ -1,0 +1,27 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    networks:
+      - web
+      - backend_network
+    env_file:
+      - .env
+    environment:
+      - NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=${NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}
+      - BASE_URL=http://app:3001
+    deploy:
+      mode: replicated
+      replicas: 1
+    restart: unless-stopped
+    
+networks:
+  web:
+    name: web_network
+    driver: bridge
+  backend_network:
+    external: true
+
