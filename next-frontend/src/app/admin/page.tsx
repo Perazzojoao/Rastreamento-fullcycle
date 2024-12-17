@@ -5,7 +5,7 @@ import { useMap } from "../../hooks/useMap";
 import { socket } from "@/utils/socket-io";
 import { LOCAL_URL } from "@/api/api";
 
-export function AdminPage() {
+const AdminPage = () => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const map = useMap(mapContainerRef);
 

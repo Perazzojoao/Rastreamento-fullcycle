@@ -1,31 +1,8 @@
 import { RouteModel } from "@/types/models";
 import { MapDriver } from "@/components/MapDriver";
-import { BASE_URL } from "@/api/api";
+import { getRoute, getRoutes } from "@/utils/getRoutes";
 
-export async function getRoutes() {
-  const response = await fetch(`${BASE_URL}/routes`, {
-    cache: "force-cache",
-    next: {
-      tags: ["routes"],
-    },
-  });
-  //revalidate por demanda
-  return response.json();
-}
-
-export async function getRoute(route_id: string): Promise<RouteModel> {
-  const response = await fetch(`${BASE_URL}/routes/${route_id}`, {
-    cache: "force-cache",
-    next: {
-      tags: [`routes-${route_id}`, "routes"],
-    },
-  });
-  //revalidate por demanda
-  return response.json();
-}
-
-
-export async function DriverPage({ searchParams }: { searchParams: Promise<{ route_id: string }> }) {
+const DriverPage = async ({ searchParams }: { searchParams: Promise<{ route_id: string }> }) => {
   const routes = await getRoutes();
   const { route_id } = await searchParams;
 
@@ -51,15 +28,18 @@ export async function DriverPage({ searchParams }: { searchParams: Promise<{ rou
         <div className="flex flex-col">
           <form className="flex flex-col space-y-4" method="get">
             <select name="route_id" className="mb-2 p-2 border rounded bg-default text-contrast">
-              {routes.map((route: RouteModel) => (
+              {routes[0] ? routes.map((route: RouteModel) => (
                 <option key={route.id} value={route.id}>
                   {route.name}
                 </option>
-              ))}
+              )) : (
+                <option value="0">Nenhuma rota disponível</option>
+              )}
             </select>
             <button
               className="bg-main text-primary p-2 rounded text-xl font-bold"
               style={{ width: "100%" }}
+              disabled={!routes[0]}
             >
               Iniciar a viagem
             </button>
